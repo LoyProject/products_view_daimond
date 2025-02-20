@@ -1,9 +1,8 @@
 <?php
-    
     $servername = "localhost";
     $username = "root";
-    $password = "12345678";
-    $dbname = "bluebox_menu";
+    $password = "";
+    $dbname = "diamond";
 
     $conn = new mysqli($servername, $username, $password, $dbname);
 

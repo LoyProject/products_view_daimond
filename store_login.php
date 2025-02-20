@@ -13,16 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $code);
         $stmt->execute();
-        $stmt->bind_result($userId, $hashedPassword);
+        $stmt->bind_result($storeId, $hashedPassword);
         $stmt->fetch();
         $stmt->close();
 
-        if ($userId && password_verify($password, $hashedPassword)) {
-            $_SESSION['user_id'] = $userId;
+        if ($storeId && password_verify($password, $hashedPassword)) {
+            $_SESSION['store_id'] = $storeId; // ✅ Store store_id in session
             $_SESSION['user_code'] = $code;
             $response['status'] = 'success';
             $response['message'] = 'Login successful.';
-            header('Location: category.php');
+            header('Location: category.php'); // ✅ Redirect after login
             exit;
         }
     }
@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $conn->close();
 echo json_encode($response);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -42,9 +43,9 @@ echo json_encode($response);
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
     </style>
 </head>
 

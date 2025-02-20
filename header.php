@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: store_login.php");
+    header(header: "Location: store_login.php");
     exit();
 }
 ?>
@@ -100,49 +100,49 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // header
-        var toggleOpen = document.getElementById('toggleOpen');
-        var toggleClose = document.getElementById('toggleClose');
-        var collapseMenu = document.getElementById('collapseMenu');
+document.addEventListener('DOMContentLoaded', () => {
+    // header
+    var toggleOpen = document.getElementById('toggleOpen');
+    var toggleClose = document.getElementById('toggleClose');
+    var collapseMenu = document.getElementById('collapseMenu');
 
-        function handleClick() {
-            if (collapseMenu.style.display === 'block') {
-                collapseMenu.style.display = 'none';
-            } else {
-                collapseMenu.style.display = 'block';
-            }
+    function handleClick() {
+        if (collapseMenu.style.display === 'block') {
+            collapseMenu.style.display = 'none';
+        } else {
+            collapseMenu.style.display = 'block';
+        }
+    }
+
+    toggleOpen.addEventListener('click', handleClick);
+    toggleClose.addEventListener('click', handleClick);
+
+    // sidebar
+    let sidebarToggleBtn = document.getElementById('toggle-sidebar');
+    let sidebar = document.getElementById('sidebar');
+    let sidebarCollapseMenu = document.getElementById('sidebar-collapse-menu');
+
+    sidebarToggleBtn.addEventListener('click', () => {
+        if (!sidebarCollapseMenu.classList.contains('open')) {
+            sidebarCollapseMenu.classList.add('open');
+            sidebarCollapseMenu.style.cssText = 'width: 250px; visibility: visible; opacity: 1;';
+            sidebarToggleBtn.style.cssText = 'left: 236px;';
+        } else {
+            sidebarCollapseMenu.classList.remove('open');
+            sidebarCollapseMenu.style.cssText = 'width: 32px; visibility: hidden; opacity: 0;';
+            sidebarToggleBtn.style.cssText = 'left: 10px;';
         }
 
-        toggleOpen.addEventListener('click', handleClick);
-        toggleClose.addEventListener('click', handleClick);
-
-        // sidebar
-        let sidebarToggleBtn = document.getElementById('toggle-sidebar');
-        let sidebar = document.getElementById('sidebar');
-        let sidebarCollapseMenu = document.getElementById('sidebar-collapse-menu');
-
-        sidebarToggleBtn.addEventListener('click', () => {
-            if (!sidebarCollapseMenu.classList.contains('open')) {
-                sidebarCollapseMenu.classList.add('open');
-                sidebarCollapseMenu.style.cssText = 'width: 250px; visibility: visible; opacity: 1;';
-                sidebarToggleBtn.style.cssText = 'left: 236px;';
-            } else {
-                sidebarCollapseMenu.classList.remove('open');
-                sidebarCollapseMenu.style.cssText = 'width: 32px; visibility: hidden; opacity: 0;';
-                sidebarToggleBtn.style.cssText = 'left: 10px;';
-            }
-
-        });
     });
+});
 
-    function logout() {
-        axios.get('logout.php')
-            .then(response => {
-                window.location.href = 'store_login.php';
-            })
-            .catch(error => {
-                console.error('Logout error:', error);
-            });
-    }
+function logout() {
+    axios.get('logout.php')
+        .then(response => {
+            window.location.href = 'store_login.php';
+        })
+        .catch(error => {
+            console.error('Logout error:', error);
+        });
+}
 </script>
