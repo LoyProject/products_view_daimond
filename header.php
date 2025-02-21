@@ -6,7 +6,6 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 
-
 if (!isset($_SESSION['store_id'])) {
     header("Location: store_login.php");
     exit();
