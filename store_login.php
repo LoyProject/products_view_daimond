@@ -1,6 +1,9 @@
+
+
 <?php
-session_start();
+
 include 'db.php';
+session_start();
 
 $response = array('status' => 'error', 'message' => 'Invalid code or password.');
 
@@ -29,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $conn->close();
-echo json_encode($response);
+
 ?>
 
 

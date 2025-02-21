@@ -1,10 +1,18 @@
 <?php
-session_start();
+include 'db.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header(header: "Location: store_login.php");
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+
+
+if (!isset($_SESSION['store_id'])) {
+    header("Location: store_login.php");
     exit();
 }
+
+
 ?>
 
 <div class='flex shadow-md py-1 px-4 sm:px-7 bg-white min-h-[70px] tracking-wide z-[110] fixed top-0 w-full'>

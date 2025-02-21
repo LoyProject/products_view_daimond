@@ -1,12 +1,11 @@
+
 <?php
-include 'db.php';
-session_start();
+
+include 'header.php';
+
 
 try {
-    if (!isset($_SESSION['store_id'])) {
-        header("Location: store_login.php");
-        exit();
-    }
+    
 
     $store_id = $_SESSION['store_id']; // Get the store ID from session
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
