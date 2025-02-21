@@ -42,7 +42,7 @@ function resetMenuColors() {
         </ul>      
         <ul class="space-y-2 mb-2">
             <li>
-                <a href="company.php"
+                <a href="store.php"
                     class="text-gray-800 text-sm flex items-center hover:bg-gray-100 rounded-md px-4 py-2 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-[20px] h-[20px] mr-3"
                         viewBox="0 0 24 24">
