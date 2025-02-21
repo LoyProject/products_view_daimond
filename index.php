@@ -1,12 +1,10 @@
 <?php
 require 'config/db.php'; // Include database connection
 
-
 // Debugging: Check if `$pdo` is defined
 if (!isset($pdo)) {
     die("Database connection not established.");
 }
-
 
 $store_code = $_GET['store_code'] ?? ''; // Get store code from URL
 
@@ -21,7 +19,7 @@ if (!$store) {
 
 // Fetch categories and products for this store
 $stmt = $pdo->prepare("
-    SELECT p.id, p.product_name AS product_name,p.usd_price,p.image, c.name AS category_name
+    SELECT p.id, p.product_name AS product_name, p.usd_price, p.image, c.name AS category_name
     FROM store_products p
     JOIN store_category c ON p.category_id = c.id
     WHERE c.store_id = ?
@@ -29,14 +27,10 @@ $stmt = $pdo->prepare("
 $stmt->execute([$store['id']]);
 $products = $stmt->fetchAll();
 
-
 if (!$store) {
     die("Store not found.");
 }
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -105,7 +99,7 @@ if (!$store) {
         <div class="product-container">
             <?php foreach ($products as $product): ?>
                 <div class="product-card">
-                    <img src="images/<?php echo !empty($product['image']) ? htmlspecialchars($product['image']) : 'default.jpg'; ?>" 
+                    <img src="<?php echo !empty($product['image']) ? htmlspecialchars($product['image']) : 'images/default.jpg'; ?>" 
                          alt="<?php echo htmlspecialchars($product['product_name']); ?>" 
                          onerror="this.onerror=null; this.src='images/default.jpg';">
                     <h2><?php echo htmlspecialchars($product['product_name']); ?></h2>

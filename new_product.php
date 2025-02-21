@@ -129,7 +129,7 @@ include 'header.php';
                                 <option value="">Select Category</option>
                                 <?php
                                 // Fetch categories from the database
-                                include 'db_connection.php';
+                                include 'db.php';
                                 $store_id = $_SESSION['store_id']; // Assuming store_id is stored in session
                                 $query = "SELECT id, name FROM store_category WHERE store_id = ?";
                                 $stmt = $conn->prepare($query);

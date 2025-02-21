@@ -2,17 +2,21 @@
 session_start();
 include 'db.php';
 
+$response = array('status' => 'error', 'message' => 'An error occurred.');
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate session store_id
     if (!isset($_SESSION['store_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Store ID is missing']);
+        $response['message'] = 'Store ID is missing';
+        echo json_encode($response);
         exit;
     }
     $store_id = $_SESSION['store_id'];
 
     // Validate form inputs
     if (!isset($_POST['name'], $_POST['usd_price'], $_POST['khr_price'], $_POST['product_code'], $_POST['description'], $_POST['category'], $_FILES['image'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+        $response['message'] = 'Missing required fields';
+        echo json_encode($response);
         exit;
     }
 
@@ -28,10 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $image = $_FILES['image'];
     $image_extension = pathinfo($image['name'], PATHINFO_EXTENSION);
     $image_name = uniqid() . '.' . $image_extension;
-    $image_path = 'images/' . $image_name;
+    $image_path = 'uploads/' . $image_name;
 
     if (!move_uploaded_file($image['tmp_name'], $image_path)) {
-        echo json_encode(['success' => false, 'message' => 'Failed to upload product image']);
+        $response['message'] = 'Failed to upload product image';
+        echo json_encode($response);
         exit;
     }
 
@@ -41,14 +46,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $conn->prepare($query);
 
     if (!$stmt) {
-        echo json_encode(['success' => false, 'message' => 'SQL Error: ' . $conn->error]);
+        $response['message'] = 'SQL Error: ' . $conn->error;
+        echo json_encode($response);
         exit;
     }
 
-    $stmt->bind_param("issdssiss", $store_id, $name, $usd_price, $khr_price, $product_code, $description, $category_id, $image_path);
+    $stmt->bind_param("isddssiss", $store_id, $name, $usd_price, $khr_price, $product_code, $description, $category_id, $image_path);
 
     if (!$stmt->execute()) {
-        echo json_encode(['success' => false, 'message' => 'Execute Error: ' . $stmt->error]);
+        $response['message'] = 'Execute Error: ' . $stmt->error;
+        echo json_encode($response);
         exit;
     }
 
@@ -61,25 +68,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($_FILES['gallery']['error'][$key] == 0) {
                 $gallery_image_extension = pathinfo($_FILES['gallery']['name'][$key], PATHINFO_EXTENSION);
                 $gallery_image_name = uniqid() . '.' . $gallery_image_extension;
-                $gallery_image_path = 'gallery/' . $gallery_image_name;
+                $gallery_image_path = 'uploads/' . $gallery_image_name;
 
                 if (!move_uploaded_file($tmp_name, $gallery_image_path)) {
-                    echo json_encode(['success' => false, 'message' => 'Failed to upload gallery image']);
+                    $response['message'] = 'Failed to upload gallery image';
+                    echo json_encode($response);
                     exit;
                 }
 
                 // Insert gallery image into database
-                $query = "INSERT INTO product_galleries (product_id, image_path) VALUES (?, ?)";
+                $query = "INSERT INTO product_gallery (product_id, image_path) VALUES (?, ?)";
                 $stmt = $conn->prepare($query);
 
                 if (!$stmt) {
-                    echo json_encode(['success' => false, 'message' => 'SQL Error (Gallery): ' . $conn->error]);
+                    $response['message'] = 'SQL Error (Gallery): ' . $conn->error;
+                    echo json_encode($response);
                     exit;
                 }
 
                 $stmt->bind_param("is", $product_id, $gallery_image_path);
                 if (!$stmt->execute()) {
-                    echo json_encode(['success' => false, 'message' => 'Execute Error (Gallery): ' . $stmt->error]);
+                    $response['message'] = 'Execute Error (Gallery): ' . $stmt->error;
+                    echo json_encode($response);
                     exit;
                 }
                 $stmt->close();
@@ -87,9 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    $conn->close();
-    echo json_encode(['success' => true, 'message' => 'Product added successfully']);
+    $response['status'] = 'success';
+    $response['message'] = 'Product added successfully';
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    $response['message'] = 'Invalid request method';
 }
+
+$conn->close();
+echo json_encode($response);
 ?>

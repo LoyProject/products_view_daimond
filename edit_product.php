@@ -5,13 +5,24 @@ if (session_status() == PHP_SESSION_NONE) {
 
 include 'db.php';
 
-
 $product_id = $_GET['id'];
 $query = "SELECT * FROM store_products WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $product_id);
 $stmt->execute();
 $product = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+// Fetch gallery images
+$query = "SELECT image_path FROM product_gallery WHERE product_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $product_id);
+$stmt->execute();
+$gallery_result = $stmt->get_result();
+$gallery_images = [];
+while ($row = $gallery_result->fetch_assoc()) {
+    $gallery_images[] = $row['image_path'];
+}
 $stmt->close();
 $conn->close();
 ?>
@@ -165,11 +176,21 @@ $conn->close();
                             <label for="image" class="block text-gray-700 font-medium mb-2">Product Image</label>
                             <input type="file" id="image" name="image"
                                 class="w-full border border-gray-300 shadow-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <?php if (!empty($product['image'])): ?>
+                                <img src="<?php echo $product['image']; ?>" alt="Product Image" class="mt-4 w-32 h-32 object-cover">
+                            <?php endif; ?>
                         </div>
                         <div class="mb-6">
                             <label for="gallery" class="block text-gray-700 font-medium mb-2">Image Gallery</label>
                             <input type="file" id="gallery" name="gallery[]" multiple
                                 class="w-full border border-gray-300 shadow-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <?php if (!empty($gallery_images)): ?>
+                                <div class="mt-4 grid grid-cols-3 gap-4">
+                                    <?php foreach ($gallery_images as $gallery_image): ?>
+                                        <img src="<?php echo $gallery_image; ?>" alt="Gallery Image" class="w-32 h-32 object-cover">
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="flex justify-end space-x-4">
                             <button type="button" onclick="document.getElementById('editProductForm').reset()"
