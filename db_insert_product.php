@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    $stmt->bind_param("isddssiss", $store_id, $name, $usd_price, $khr_price, $product_code, $description, $category_id, $image_path);
+    $stmt->bind_param("isddssis", $store_id, $name, $usd_price, $khr_price, $product_code, $description, $category_id, $image_path);
 
     if (!$stmt->execute()) {
         $response['message'] = 'Execute Error: ' . $stmt->error;
