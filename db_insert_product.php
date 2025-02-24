@@ -32,10 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO store_products (product_name, usd_price, khr_price, product_code, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sddsssi", $productName, $usdPrice, $khrPrice, $productCode, $description, $categoryId, $image);
+        $stmt->bind_param("sddssis", $productName, $usdPrice, $khrPrice, $productCode, $description, $categoryId, $image);
 
         if ($stmt->execute()) {
-            $productId = $stmt->insert_id; // Get the ID of the newly inserted product
+            $productId = $stmt->insert_id;
 
             if (!empty($gallery)) {
                 $stmt->close();

@@ -18,65 +18,65 @@ include 'header.php';
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        body {
-            font-family: 'Khmer OS Battambang', sans-serif;
-        }
+    body {
+        font-family: 'Khmer OS Battambang', sans-serif;
+    }
     </style>
     <script>
-        function addProduct(event) {
-            event.preventDefault();
-            const formData = new FormData(document.getElementById('addProductForm'));
+    function addProduct(event) {
+        event.preventDefault();
+        const formData = new FormData(document.getElementById('addProductForm'));
 
-            Swal.fire({
-                title: 'Adding Product...',
-                text: 'Please wait while the product is being added.',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+        Swal.fire({
+            title: 'Adding Product...',
+            text: 'Please wait while the product is being added.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        axios.post('db_insert_product.php', formData)
+            .then(response => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Product Added',
+                    text: 'The product has been added successfully!'
+                }).then(() => {
+                    window.location.href = 'product.php';
+                });
+                document.getElementById('addProductForm').reset();
+            })
+            .catch(error => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'There was an error adding the product. Please try again.'
+                });
             });
+    }
 
-            axios.post('db_insert_product.php', formData)
-                .then(response => {
-                    Swal.close();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Product Added',
-                        text: 'The product has been added successfully!'
-                    }).then(() => {
-                        window.location.href = 'product.php';
-                    });
-                    document.getElementById('addProductForm').reset();
-                })
-                .catch(error => {
-                    Swal.close();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'There was an error adding the product. Please try again.'
-                    });
+    function fetchCategories() {
+        axios.get(`fetch_categories.php?store_id=${<?php echo $_SESSION['store_id']; ?>}`)
+            .then(response => {
+                const categories = response.data;
+                const categorySelect = document.getElementById('category');
+                categorySelect.innerHTML = '<option value="">Select Category</option>';
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categorySelect.appendChild(option);
                 });
-        }
+            })
+            .catch(error => {
+                console.error('Error fetching categories:', error);
+            });
+    }
 
-        function fetchCategories() {
-            axios.get(`fetch_categories.php?store_id=${<?php echo $_SESSION['store_id']; ?>}`)
-                .then(response => {
-                    const categories = response.data;
-                    const categorySelect = document.getElementById('category');
-                    categorySelect.innerHTML = '<option value="">Select Category</option>';
-                    categories.forEach(category => {
-                        const option = document.createElement('option');
-                        option.value = category.id;
-                        option.textContent = category.name;
-                        categorySelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching categories:', error);
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', fetchCategories);
+    document.addEventListener('DOMContentLoaded', fetchCategories);
     </script>
 </head>
 
@@ -90,7 +90,8 @@ include 'header.php';
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold">Create New Product</h2>
                         <a href="product.php">
-                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none">
+                            <button
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none">
                                 Back
                             </button>
                         </a>
@@ -151,7 +152,7 @@ include 'header.php';
                         </div>
                         <div class="mb-6">
                             <label for="gallery" class="block text-gray-700 font-medium mb-2">Image Gallery</label>
-                            <input type="file" id="gallery" name="gallery[]" multiple
+                            <input type="file" id="gallery" name="  []" multiple
                                 class="w-full border border-gray-300 shadow-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                         <div class="flex justify-end space-x-4">
