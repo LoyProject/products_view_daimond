@@ -103,7 +103,13 @@ foreach ($products as $product) {
         <div class="flex items-center justify-center py-2 bg-gray-100">
             <div class="flex-grow border-t-4 border-gray-300"></div>
             <span id="category-title" class="px-3 text-black font-bold text-lg">
-                <?php echo htmlspecialchars(array_key_first($productsByCategory)); ?>
+                <?php
+                if (empty($productsByCategory)) {
+                    echo 'No products found';
+                } else {
+                    echo htmlspecialchars(array_key_first($productsByCategory));
+                }
+                ?>
             </span>
             <div class="flex-grow border-t-4 border-gray-300"></div>
         </div>
@@ -141,7 +147,7 @@ foreach ($products as $product) {
                     <?php echo htmlspecialchars($product['product_name']); ?>
                 </h2>
                 <p class="text-gray-700">Price: $
-                    <?php echo htmlspecialchars($product['usd_price']); ?>
+                    <?php echo number_format((float) $product['usd_price'], 2); ?>
                 </p>
                 <button class="mt-4 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600">Buy Now</button>
             </div>
@@ -149,9 +155,8 @@ foreach ($products as $product) {
         </div>
     </div>
     <?php endforeach; ?>
-    <?php else: ?>
-    <p>No products found for this store.</p>
     <?php endif; ?>
+
     <footer class="mt-4 p-4 bg-gray-200">
         <p class="text-center text-gray-600">© 2025 Loy Team. All rights reserved.</p>
     </footer>
