@@ -2,7 +2,7 @@
 $host = "localhost";
 $dbname = "diamond";
 $username = "root";
-$password = "";
+$password = "12345678";
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);

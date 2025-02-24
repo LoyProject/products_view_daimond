@@ -1,106 +1,63 @@
 <?php
-session_start();
 include 'db.php';
 
 $response = array('status' => 'error', 'message' => 'An error occurred.');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Validate session store_id
-    if (!isset($_SESSION['store_id'])) {
-        $response['message'] = 'Store ID is missing';
-        echo json_encode($response);
-        exit;
-    }
-    $store_id = $_SESSION['store_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $productName = isset($_POST['name']) ? trim($_POST['name']) : '';
+    $usdPrice = isset($_POST['usd_price']) ? floatval($_POST['usd_price']) : 0;
+    $khrPrice = isset($_POST['khr_price']) ? floatval($_POST['khr_price']) : 0;
+    $productCode = isset($_POST['product_code']) ? trim($_POST['product_code']) : '';
+    $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+    $categoryId = isset($_POST['category']) ? intval($_POST['category']) : 0;
 
-    // Validate form inputs
-    if (!isset($_POST['name'], $_POST['usd_price'], $_POST['khr_price'], $_POST['product_code'], $_POST['description'], $_POST['category'], $_FILES['image'])) {
-        $response['message'] = 'Missing required fields';
-        echo json_encode($response);
-        exit;
+    $image = '';
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
+        $image = 'uploads/' . uniqid() . '_' . basename($_FILES['image']['name']);
+        move_uploaded_file($_FILES['image']['tmp_name'], $image);
     }
 
-    // Sanitize inputs
-    $name = trim($_POST['name']);
-    $usd_price = floatval($_POST['usd_price']);
-    $khr_price = floatval($_POST['khr_price']);
-    $product_code = trim($_POST['product_code']);
-    $description = trim($_POST['description']);
-    $category_id = intval($_POST['category']);
-
-    // Handle product image upload
-    $image = $_FILES['image'];
-    $image_extension = pathinfo($image['name'], PATHINFO_EXTENSION);
-    $image_name = uniqid() . '.' . $image_extension;
-    $image_path = 'uploads/' . $image_name;
-
-    if (!move_uploaded_file($image['tmp_name'], $image_path)) {
-        $response['message'] = 'Failed to upload product image';
-        echo json_encode($response);
-        exit;
-    }
-
-    // Insert product into database
-    $query = "INSERT INTO store_products (store_id, product_name, usd_price, khr_price, product_code, description, category_id, image) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
-
-    if (!$stmt) {
-        $response['message'] = 'SQL Error: ' . $conn->error;
-        echo json_encode($response);
-        exit;
-    }
-
-    $stmt->bind_param("isddssis", $store_id, $name, $usd_price, $khr_price, $product_code, $description, $category_id, $image_path);
-
-    if (!$stmt->execute()) {
-        $response['message'] = 'Execute Error: ' . $stmt->error;
-        echo json_encode($response);
-        exit;
-    }
-
-    $product_id = $stmt->insert_id;
-    $stmt->close();
-
-    // Handle gallery images upload
-    if (isset($_FILES['gallery']) && count($_FILES['gallery']['tmp_name']) > 0) {
+    $gallery = [];
+    if (isset($_FILES['gallery'])) {
         foreach ($_FILES['gallery']['tmp_name'] as $key => $tmp_name) {
-            if ($_FILES['gallery']['error'][$key] == 0) {
-                $gallery_image_extension = pathinfo($_FILES['gallery']['name'][$key], PATHINFO_EXTENSION);
-                $gallery_image_name = uniqid() . '.' . $gallery_image_extension;
-                $gallery_image_path = 'uploads/' . $gallery_image_name;
-
-                if (!move_uploaded_file($tmp_name, $gallery_image_path)) {
-                    $response['message'] = 'Failed to upload gallery image';
-                    echo json_encode($response);
-                    exit;
-                }
-
-                // Insert gallery image into database
-                $query = "INSERT INTO product_gallery (product_id, image_path) VALUES (?, ?)";
-                $stmt = $conn->prepare($query);
-
-                if (!$stmt) {
-                    $response['message'] = 'SQL Error (Gallery): ' . $conn->error;
-                    echo json_encode($response);
-                    exit;
-                }
-
-                $stmt->bind_param("is", $product_id, $gallery_image_path);
-                if (!$stmt->execute()) {
-                    $response['message'] = 'Execute Error (Gallery): ' . $stmt->error;
-                    echo json_encode($response);
-                    exit;
-                }
-                $stmt->close();
+            if ($_FILES['gallery']['error'][$key] == UPLOAD_ERR_OK) {
+                $galleryPath = 'uploads/' . uniqid() . '_' . basename($_FILES['gallery']['name'][$key]);
+                move_uploaded_file($tmp_name, $galleryPath);
+                $gallery[] = $galleryPath;
             }
         }
     }
 
-    $response['status'] = 'success';
-    $response['message'] = 'Product added successfully';
-} else {
-    $response['message'] = 'Invalid request method';
+    if (!empty($productName) && $usdPrice > 0 && $khrPrice > 0 && !empty($productCode) && !empty($description) && $categoryId > 0) {
+        $sql = "INSERT INTO store_products (product_name, usd_price, khr_price, product_code, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sddsssi", $productName, $usdPrice, $khrPrice, $productCode, $description, $categoryId, $image);
+
+        if ($stmt->execute()) {
+            $productId = $stmt->insert_id; // Get the ID of the newly inserted product
+
+            if (!empty($gallery)) {
+                $stmt->close();
+
+                $stmt = $conn->prepare("INSERT INTO product_gallery (product_id, image_path) VALUES (?, ?)");
+                foreach ($gallery as $galleryImage) {
+                    $stmt->bind_param("is", $productId, $galleryImage);
+                    $stmt->execute();
+                }
+                $stmt->close();
+            }
+
+            $response['status'] = 'success';
+            $response['message'] = 'Product inserted successfully.';
+        } else {
+            $response['message'] = 'Failed to insert product.';
+        }
+
+        $stmt->close();
+    } else {
+        $response['message'] = 'Invalid product data.';
+    }
 }
 
 $conn->close();
