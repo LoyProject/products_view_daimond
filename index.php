@@ -55,9 +55,15 @@
 
         .category-section {
             position: sticky;
-            top: 145px;
+            top: 200px;
             z-index: 10;
-            background-color: #f3f4f6;
+            width: 100%;
+            padding: 0;
+        }
+
+        .category-section .container {
+            background-color: 'bg-gray-200';
+            width: 100%;
         }
 
         #product-list {
@@ -72,6 +78,10 @@
 </head>
 <body class="bg-gray-100 mx-auto w-full md:w-2/3">
     <div class="category-list-header" id="categoryHeader">
+        <div class="flex max-w-md px-4 pt-2 items-center">
+            <img src='<?php echo htmlspecialchars($store['logo']); ?>' alt="Logo" class="h-12 object-cover">
+            <h1 class="text-xl font-bold ml-4"><?php echo htmlspecialchars($store['store_name']); ?></h1>
+        </div>
         <div class="container px-4 pt-4 pb-2">
             <div class="overflow-x-scroll whitespace-nowrap" id="categoryList">
                 <?php foreach ($categories as $index => $category): ?>
@@ -128,59 +138,6 @@
     </footer>
 </body>
 <script>
-    let scrollTimeout;
-    document.addEventListener('scroll', function() {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            const categorySections = document.querySelectorAll('.category-section');
-            const categoryButtons = document.querySelectorAll('.category-btn');
-            let activeCategory = null;
-
-            categorySections.forEach(section => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top <= 150 && rect.bottom >= 150) {
-                    activeCategory = section.getAttribute('data-category');
-                }
-            });
-
-            categoryButtons.forEach(button => {
-                if (button.getAttribute('data-category') === activeCategory) {
-                    button.classList.add('bg-red-100', 'text-red-500');
-                    button.classList.remove('bg-white', 'text-black');
-                    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    lastClickedCategory = activeCategory;
-                } else {
-                    button.classList.remove('bg-red-100', 'text-red-500');
-                    button.classList.add('bg-white', 'text-black');
-                }
-            });
-        }, 100);
-    }, { passive: true });
-    
-    document.addEventListener("DOMContentLoaded", function () {
-        const categoryButtons = document.querySelectorAll(".category-btn");
-        categoryButtons.forEach(button => {
-            button.addEventListener("click", function (e) {
-                e.preventDefault();
-                const selectedCategory = this.dataset.category;
-                if (lastClickedCategory === selectedCategory) return;
-
-                lastClickedCategory = selectedCategory;
-                categoryButtons.forEach(btn => btn.classList.remove("bg-red-100", "text-red-500"));
-                this.classList.add("bg-red-100", "text-red-500");
-
-                const categoryHeader = document.querySelector(`.category-section[data-category="${selectedCategory}"]`);
-                if (categoryHeader) {
-                    const headerHeight = document.querySelector(".category-list-header").offsetHeight;
-                    const yOffset = categoryHeader.getBoundingClientRect().top + window.scrollY - headerHeight;
-                    setTimeout(() => {
-                        window.scrollTo({ top: Math.max(yOffset, 0), behavior: "smooth" });
-                    }, 50);
-                }
-            });
-        });
-    });
-
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
         const noMatchMessage = document.getElementById("noMatchMessage");
@@ -188,26 +145,78 @@
         const productSections = document.querySelectorAll(".product-section");
         const categoryButtons = document.querySelectorAll(".category-btn");
         let lastClickedCategory = null;
+        let isScrolling = false;
+
+        function highlightButton(activeCategory) {
+            categoryButtons.forEach(button => {
+                const buttonCategory = button.getAttribute('data-category');
+                if (buttonCategory === activeCategory && button.style.display !== "none") {
+                    button.classList.add('bg-red-100', 'text-red-500');
+                    button.classList.remove('bg-white', 'text-black');
+                    button.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest', 
+                        inline: 'center' 
+                    });
+                } else {
+                    button.classList.remove('bg-red-100', 'text-red-500');
+                    button.classList.add('bg-white', 'text-black');
+                }
+            });
+        }
+
+        function handleScroll() {
+            if (isScrolling) return;
+
+            let activeCategory = null;
+            categorySections.forEach(section => {
+                if (section.style.display !== "none") {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 200 && rect.bottom >= 100) {
+                        activeCategory = section.getAttribute('data-category');
+                    }
+                }
+            });
+
+            if (activeCategory && activeCategory !== lastClickedCategory) {
+                lastClickedCategory = activeCategory;
+                highlightButton(activeCategory);
+            } else if (!activeCategory && lastClickedCategory) {
+                highlightButton(lastClickedCategory);
+            }
+        }
+
+        function handleCategoryClick(e) {
+            e.preventDefault();
+            const selectedCategory = this.getAttribute("data-category");
+            if (lastClickedCategory === selectedCategory) return;
+
+            isScrolling = true;
+            lastClickedCategory = selectedCategory;
+            highlightButton(selectedCategory);
+
+            const categoryHeader = document.querySelector(`.category-section[data-category="${selectedCategory}"]`);
+            if (categoryHeader) {
+                const headerHeight = document.querySelector(".category-list-header").offsetHeight;
+                const yOffset = categoryHeader.getBoundingClientRect().top + window.scrollY - headerHeight + 5;
+                window.scrollTo({ 
+                    top: Math.max(yOffset, 0), 
+                    behavior: "smooth" 
+                });
+                setTimeout(() => { isScrolling = false; }, 500);
+            }
+        }
 
         let searchTimeout;
         searchInput.addEventListener("input", function () {
             clearTimeout(searchTimeout);
-            const searchTerm = this.value.trim().toLowerCase();
             searchTimeout = setTimeout(() => {
-                const categorySections = document.querySelectorAll(".category-section");
-                const productSections = document.querySelectorAll(".product-section");
-                const categoryButtons = document.querySelectorAll(".category-btn");
-                const noMatchMessage = document.getElementById("noMatchMessage");
+                const searchTerm = this.value.trim().toLowerCase();
                 let hasMatch = false;
 
                 if (searchTerm) {
                     const words = searchTerm.split(/\s+/);
                     const firstWord = words[0];
-
-                    categoryButtons.forEach(btn => {
-                        btn.classList.remove("bg-red-100", "text-red-500");
-                        btn.classList.add("bg-white", "text-black");
-                    });
 
                     let firstMatchingButton = null;
                     categoryButtons.forEach(button => {
@@ -223,20 +232,13 @@
                         }
                     });
 
-                    if (firstMatchingButton) {
-                        firstMatchingButton.classList.add("bg-red-100", "text-red-500");
-                        firstMatchingButton.classList.remove("bg-white", "text-black");
-                        lastClickedCategory = firstMatchingButton.getAttribute("data-category");
-                    }
-
                     categorySections.forEach(section => {
                         const categoryName = section.getAttribute("data-category").toLowerCase();
                         const productSection = section.nextElementSibling;
                         if (categoryName.includes(firstWord)) {
                             section.style.display = "block";
                             productSection.style.display = "grid";
-                            const products = productSection.querySelectorAll('.bg-white');
-                            if (products.length > 0) {
+                            if (productSection.querySelectorAll('.bg-white').length > 0) {
                                 hasMatch = true;
                             }
                         } else {
@@ -244,6 +246,11 @@
                             productSection.style.display = "none";
                         }
                     });
+
+                    if (firstMatchingButton) {
+                        lastClickedCategory = firstMatchingButton.getAttribute("data-category");
+                        highlightButton(lastClickedCategory);
+                    }
 
                     noMatchMessage.classList.toggle("hidden", hasMatch);
                 } else {
@@ -257,72 +264,22 @@
                         section.style.display = "grid";
                     });
                     noMatchMessage.classList.add("hidden");
-                    
-                    if (lastClickedCategory) {
-                        categoryButtons.forEach(btn => {
-                            if (btn.getAttribute("data-category") === lastClickedCategory) {
-                                btn.classList.add("bg-red-100", "text-red-500");
-                                btn.classList.remove("bg-white", "text-black");
-                            } else {
-                                btn.classList.remove("bg-red-100", "text-red-500");
-                                btn.classList.add("bg-white", "text-black");
-                            }
-                        });
-                    }
+                    highlightButton(lastClickedCategory || categoryButtons[0].getAttribute('data-category'));
                 }
             }, 300);
         });
 
         categoryButtons.forEach(button => {
-            button.addEventListener("click", function (e) {
-                e.preventDefault();
-                const selectedCategory = this.getAttribute("data-category");
-                if (lastClickedCategory === selectedCategory) return;
-
-                lastClickedCategory = selectedCategory;
-                categoryButtons.forEach(btn => {
-                    btn.classList.remove("bg-red-100", "text-red-500");
-                    btn.classList.add("bg-white", "text-black");
-                });
-                this.classList.add("bg-red-100", "text-red-500");
-
-                const categoryHeader = document.querySelector(`.category-section[data-category="${selectedCategory}"]`);
-                if (categoryHeader) {
-                    const headerHeight = document.querySelector(".category-list-header").offsetHeight;
-                    const yOffset = categoryHeader.getBoundingClientRect().top + window.scrollY - headerHeight;
-                    setTimeout(() => {
-                        window.scrollTo({ top: Math.max(yOffset, 0), behavior: "smooth" });
-                    }, 50);
-                }
-            });
+            button.addEventListener("click", handleCategoryClick);
         });
 
-        document.addEventListener('scroll', function() {
-            const categorySections = document.querySelectorAll('.category-section');
-            const categoryButtons = document.querySelectorAll('.category-btn');
-            let activeCategory = null;
+        document.addEventListener('scroll', handleScroll, { passive: true });
 
-            categorySections.forEach(section => {
-                if (section.style.display !== "none") {
-                    const rect = section.getBoundingClientRect();
-                    if (rect.top <= 150 && rect.bottom >= 150) {
-                        activeCategory = section.getAttribute('data-category');
-                    }
-                }
-            });
-
-            categoryButtons.forEach(button => {
-                if (button.getAttribute('data-category') === activeCategory) {
-                    button.classList.add('bg-red-100', 'text-red-500');
-                    button.classList.remove('bg-white', 'text-black');
-                    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    lastClickedCategory = activeCategory;
-                } else {
-                    button.classList.remove('bg-red-100', 'text-red-500');
-                    button.classList.add('bg-white', 'text-black');
-                }
-            });
-        }, { passive: true });
+        if (categoryButtons.length > 0) {
+            const initialCategory = categoryButtons[0].getAttribute('data-category');
+            lastClickedCategory = initialCategory;
+            highlightButton(initialCategory);
+        }
     });
 </script>
 </html>
