@@ -102,18 +102,15 @@
     <div id="product-list" class="mx-4 md:mx-0">
         <?php $totalProducts = 0; ?>
         <?php foreach ($categories as $category): ?>
-            <?php $categoryProducts = array_filter($products, fn($p) => $p['category_id'] == $category['id']); ?>
-            <?php if (count($categoryProducts) > 0): ?>
-                <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
-                    <div class="container px-4 py-2 bg-gray-100">
-                        <div class="flex items-center justify-center">
-                            <div class="flex-grow border-t-4 border-gray-300 ml-6 sm:ml-12"></div>
-                            <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
-                            <div class="flex-grow border-t-4 border-gray-300 mr-6 sm:mr-12"></div>
-                        </div>
+            <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
+                <div class="container px-4 py-2 bg-gray-100">
+                    <div class="flex items-center justify-center">
+                        <div class="flex-grow border-t-4 border-gray-300 ml-6 sm:ml-12"></div>
+                        <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
+                        <div class="flex-grow border-t-4 border-gray-300 mr-6 sm:mr-12"></div>
                     </div>
                 </div>
-            <?php endif; ?>
+            </div>
             <div class="grid grid-cols-2 gap-4 mt-0 md:mt-2 mx-2 product-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
                 <?php $categoryProducts = 0; ?>
                 <?php foreach ($products as $product): ?>
