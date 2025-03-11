@@ -80,6 +80,11 @@
     </style>
 </head>
 <body class="bg-gray-100 mx-auto w-full md:w-2/3">
+    <button id="scrollToTopBtn" 
+        class="hidden fixed bottom-6 right-6 border-2 border-red-500 bg-red-100 text-red-500 px-5 py-3 rounded-full shadow-lg hover:bg-red-100 hover:text-red-500 transition duration-300 font-medium">
+        ▲ Top
+    </button>
+
     <div class="category-list-header" id="categoryHeader">
         <div class="flex max-w-md px-4 pt-2 items-center">
             <img src='<?php echo htmlspecialchars($store['logo']); ?>' alt="Logo" class="h-12 object-cover">
@@ -137,6 +142,18 @@
     </footer>
 </body>
 <script>
+    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 200) {
+            scrollToTopBtn.classList.remove("hidden");
+        } else {
+            scrollToTopBtn.classList.add("hidden");
+        }
+    });
+    scrollToTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
         const noMatchMessage = document.getElementById("noMatchMessage");
