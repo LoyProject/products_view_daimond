@@ -45,6 +45,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diamond</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         .category-list-header {
             position: sticky;
@@ -99,30 +102,29 @@
     <div id="product-list" class="mx-4 md:mx-0">
         <?php $totalProducts = 0; ?>
         <?php foreach ($categories as $category): ?>
-            <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
-                <div class="container px-4 py-2 bg-gray-100">
-                    <div class="flex items-center justify-center">
-                        <div class="flex-grow border-t-4 border-gray-300 ml-12"></div>
-                        <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
-                        <div class="flex-grow border-t-4 border-gray-300 mr-12"></div>
+            <?php $categoryProducts = array_filter($products, fn($p) => $p['category_id'] == $category['id']); ?>
+            <?php if (count($categoryProducts) > 0): ?>
+                <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
+                    <div class="container px-4 py-2 bg-gray-100">
+                        <div class="flex items-center justify-center">
+                            <div class="flex-grow border-t-4 border-gray-300 ml-6 sm:ml-12"></div>
+                            <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
+                            <div class="flex-grow border-t-4 border-gray-300 mr-6 sm:mr-12"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-0 md:mt-2 mx-2 product-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
-                <?php 
-                $categoryProducts = 0;
-                foreach ($products as $product): 
-                    if ($product['category_id'] == $category['id']): 
-                        $categoryProducts++;
-                        $totalProducts++;
-                ?>
-                    <div class="bg-white mb-4 p-4 rounded-lg shadow-md category-<?php echo $product['category_id']; ?>">
-                        <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="w-full h-48 object-cover mb-4 rounded-lg" loading="lazy">
-                        <h2 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($product['product_name']); ?></h2>
-                        <p class="text-gray-700 mb-2"><?php echo htmlspecialchars($product['description']); ?></p>
-                        <p class="text-gray-900 font-bold mb-4">$<?php echo number_format($product['usd_price'], 2); ?></p>
-                        <button class="mt-4 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600">Buy Now</button>
-                    </div>
+            <?php endif; ?>
+            <div class="grid grid-cols-2 gap-4 mt-0 md:mt-2 mx-2 product-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
+                <?php $categoryProducts = 0; ?>
+                <?php foreach ($products as $product): ?>
+                    <?php if ($product['category_id'] == $category['id']): ?>
+                    <?php $categoryProducts++; ?>
+                    <?php $totalProducts++; ?>
+                    <a href="#" class="bg-white shadow rounded-lg category-<?php echo $product['category_id']; ?>">
+                        <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="w-full h-[450px] mb-2 rounded-tl-lg rounded-tr-lg border" loading="lazy" onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
+                        <p class="text-gray-500 text-xs font-bold mb-1 px-4">ID: <?php echo htmlspecialchars($product['product_code']); ?></p>
+                        <p class="text-sm font-bold mb-6 px-4"><?php echo htmlspecialchars($product['product_name']); ?></p>
+                    </a>
                 <?php endif; ?>
                 <?php endforeach; ?>
             </div>
@@ -146,6 +148,7 @@
         const categoryButtons = document.querySelectorAll(".category-btn");
         let lastClickedCategory = null;
         let isScrolling = false;
+        let scrollTimeout;
 
         function highlightButton(activeCategory) {
             categoryButtons.forEach(button => {
@@ -166,24 +169,25 @@
         }
 
         function handleScroll() {
-            if (isScrolling) return;
-
-            let activeCategory = null;
-            categorySections.forEach(section => {
-                if (section.style.display !== "none") {
-                    const rect = section.getBoundingClientRect();
-                    if (rect.top <= 200 && rect.bottom >= 100) {
-                        activeCategory = section.getAttribute('data-category');
+            if (scrollTimeout) return;
+            scrollTimeout = requestAnimationFrame(() => {
+                let activeCategory = null;
+                categorySections.forEach(section => {
+                    if (section.style.display !== "none") {
+                        const rect = section.getBoundingClientRect();
+                        if (rect.top <= 200 && rect.bottom >= 100) {
+                            activeCategory = section.getAttribute('data-category');
+                        }
                     }
+                });
+                if (activeCategory && activeCategory !== lastClickedCategory) {
+                    lastClickedCategory = activeCategory;
+                    highlightButton(activeCategory);
+                } else if (!activeCategory && lastClickedCategory) {
+                    highlightButton(lastClickedCategory);
                 }
+                scrollTimeout = null;
             });
-
-            if (activeCategory && activeCategory !== lastClickedCategory) {
-                lastClickedCategory = activeCategory;
-                highlightButton(activeCategory);
-            } else if (!activeCategory && lastClickedCategory) {
-                highlightButton(lastClickedCategory);
-            }
         }
 
         function handleCategoryClick(e) {
@@ -275,10 +279,21 @@
 
         document.addEventListener('scroll', handleScroll, { passive: true });
 
+        document.querySelectorAll("img").forEach(img => {
+            img.onerror = function () {
+                this.src = 'uploads/default-placeholder.png';
+                this.onerror = null;
+            };
+        });
+
         if (categoryButtons.length > 0) {
             const initialCategory = categoryButtons[0].getAttribute('data-category');
             lastClickedCategory = initialCategory;
             highlightButton(initialCategory);
+        }
+
+        if (!firstMatchingButton && categoryButtons.length > 0) {
+            firstMatchingButton = categoryButtons[0];
         }
     });
 </script>
