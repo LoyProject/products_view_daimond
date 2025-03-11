@@ -118,7 +118,7 @@
                     <?php $categoryProducts++; ?>
                     <?php $totalProducts++; ?>
                     <a href="#" class="bg-white shadow rounded-lg category-<?php echo $product['category_id']; ?>">
-                        <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="w-full h-[450px] mb-2 rounded-tl-lg rounded-tr-lg border" loading="lazy" onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
+                        <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="w-full h-[150px] sm:h-[450px] mb-2 rounded-tl-lg rounded-tr-lg border" loading="lazy" onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
                         <p class="text-gray-500 text-xs font-bold mb-1 px-4">ID: <?php echo htmlspecialchars($product['product_code']); ?></p>
                         <p class="text-sm font-bold mb-6 px-4"><?php echo htmlspecialchars($product['product_name']); ?></p>
                     </a>
