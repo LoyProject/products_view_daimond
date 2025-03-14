@@ -105,42 +105,157 @@
     </div>
 
     <div id="product-list" class="mx-4 md:mx-0">
-        <?php $totalProducts = 0; ?>
-        <?php foreach ($categories as $category): ?>
-            <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
-                <div class="container px-4 py-2 bg-gray-100">
-                    <div class="flex items-center justify-center">
-                        <div class="flex-grow border-t-4 border-gray-300 ml-6 sm:ml-12"></div>
-                        <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
-                        <div class="flex-grow border-t-4 border-gray-300 mr-6 sm:mr-12"></div>
-                    </div>
+    <?php $totalProducts = 0; ?>
+    <?php foreach ($categories as $category): ?>
+        <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
+            <div class="container px-4 py-2 bg-gray-100">
+                <div class="flex items-center justify-center">
+                    <div class="flex-grow border-t-4 border-gray-300 ml-6 sm:ml-12"></div>
+                    <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
+                    <div class="flex-grow border-t-4 border-gray-300 mr-6 sm:mr-12"></div>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4 mt-0 md:mt-2 mx-2 product-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
-                <?php $categoryProducts = 0; ?>
-                <?php foreach ($products as $product): ?>
-                    <?php if ($product['category_id'] == $category['id']): ?>
-                    <?php $categoryProducts++; ?>
-                    <?php $totalProducts++; ?>
-                    <a href="#" class="bg-white shadow rounded-lg category-<?php echo $product['category_id']; ?>">
-                        <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>" class="w-full h-[150px] sm:h-[450px] mb-2 rounded-tl-lg rounded-tr-lg border" loading="lazy" onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
-                        <p class="text-gray-500 text-xs font-bold mb-1 px-4">ID: <?php echo htmlspecialchars($product['product_code']); ?></p>
-                        <p class="text-sm font-bold mb-6 px-4"><?php echo htmlspecialchars($product['product_name']); ?></p>
-                    </a>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-0 md:mt-2 mx-2 product-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
+            <?php $categoryProducts = 0; ?>
+            <?php foreach ($products as $product): ?>
+                <?php if ($product['category_id'] == $category['id']): ?>
+                <?php $categoryProducts++; ?>
+                <?php $totalProducts++; ?>
+                <a href="#" class="bg-white shadow rounded-lg product-card category-<?php echo $product['category_id']; ?>" 
+                   data-name="<?php echo htmlspecialchars($product['product_name']); ?>" 
+                   data-id="<?php echo htmlspecialchars($product['product_code']); ?>" 
+                   data-image="<?php echo htmlspecialchars($product['image']); ?>"
+                   data-description="<?php echo htmlspecialchars($product['description'] ?? 'No description available.'); ?>"
+                   data-usd-price="<?php echo htmlspecialchars($product['usd_price'] ?? 'N/A'); ?>"
+                   data-khr-price="<?php echo htmlspecialchars($product['khr_price'] ?? 'N/A'); ?>">
+                    <img src="<?php echo $product['image']; ?>" 
+                         alt="<?php echo htmlspecialchars($product['product_name']); ?>" 
+                         class="w-full h-[150px] sm:h-[450px] mb-2 rounded-tl-lg rounded-tr-lg border" 
+                         loading="lazy" 
+                         onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
+                    <p class="text-gray-500 text-xs font-bold mb-1 px-4">ID: <?php echo htmlspecialchars($product['product_code']); ?></p>
+                    <p class="text-sm font-bold mb-6 px-4"><?php echo htmlspecialchars($product['product_name']); ?></p>
+                </a>
                 <?php endif; ?>
-                <?php endforeach; ?>
-            </div>
-        <?php endforeach; ?>
-        <div id="noMatchMessage" class="text-gray-500 text-center py-4 hidden">No products match your search.</div>
-        <?php if ($totalProducts === 0): ?>
-            <div class="text-gray-500 text-center py-4">No products available in this store.</div>
-        <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endforeach; ?>
+    <div id="noMatchMessage" class="text-gray-500 text-center py-4 hidden">No products match your search.</div>
+    <?php if ($totalProducts === 0): ?>
+        <div class="text-gray-500 text-center py-4">No products available in this store.</div>
+    <?php endif; ?>
+</div>
+
+<!-- ✅ MODAL HTML -->
+<div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-lg relative">
+        <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+        <img id="modalImage" src="" class="w-full h-48 object-cover rounded">
+        <h2 id="modalTitle" class="text-xl font-bold mt-4"></h2>
+        <p id="modalProductID" class="text-gray-600 text-sm mt-1"></p>
+        <p id="modalDescription" class="text-gray-700 mt-2"></p>
+        <p id="modalPriceUsd" class="text-lg font-bold mt-2 text-blue-500"></p>
+        <p id="modalPriceKhr" class="text-lg font-bold mt-2 text-green-500"></p>
     </div>
+</div>
+
+<!-- ✅ JAVASCRIPT FOR MODAL -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("productModal");
+        const closeModal = document.getElementById("closeModal");
+        const modalImage = document.getElementById("modalImage");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalProductID = document.getElementById("modalProductID");
+        const modalDescription = document.getElementById("modalDescription");
+        const modalPriceUsd = document.getElementById("modalPriceUsd");
+        const modalPriceKhr = document.getElementById("modalPriceKhr");
+
+        document.querySelectorAll(".product-card").forEach(card => {
+            card.addEventListener("click", function (event) {
+                event.preventDefault();
+
+                const name = this.getAttribute("data-name");
+                const productId = this.getAttribute("data-id");
+                const image = this.getAttribute("data-image");
+                const description = this.getAttribute("data-description");
+                const usdPrice = this.getAttribute("data-usd-price");
+                const khrPrice = this.getAttribute("data-khr-price");
+
+                modalTitle.textContent = name;
+                modalProductID.textContent = "Product ID: " + productId;
+                modalImage.src = image;
+                modalDescription.textContent = description || "No description available.";
+                modalPriceUsd.textContent = "USD Price: $" + (usdPrice || "N/A");
+                modalPriceKhr.textContent = "KHR Price: ៛" + (khrPrice || "N/A");
+
+                modal.classList.remove("hidden");
+            });
+        });
+
+        closeModal.addEventListener("click", function () {
+            modal.classList.add("hidden");
+        });
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+    });
+</script>
+
 
     <footer class="p-4 bg-gray-200 mt-6">
         <p class="text-center text-gray-600">© 2025 Loy Team. All rights reserved.</p>
     </footer>
+
+
+
+
 </body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("productModal");
+        const closeModal = document.getElementById("closeModal");
+        const modalImage = document.getElementById("modalImage");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalDescription = document.getElementById("modalDescription");
+        const modalPrice = document.getElementById("modalPrice");
+
+        document.querySelectorAll(".product-card").forEach(card => {
+            card.addEventListener("click", function (event) {
+                event.preventDefault();
+
+                const name = this.getAttribute("data-name");
+                const image = this.getAttribute("data-image");
+                const description = this.getAttribute("data-description");
+                const price = this.getAttribute("data-price");
+
+                modalTitle.textContent = name;
+                modalImage.src = image;
+                modalDescription.textContent = description || "No description available.";
+                modalPrice.textContent = "Price: $" + (price || "N/A");
+
+                modal.classList.remove("hidden");
+            });
+        });
+
+        closeModal.addEventListener("click", function () {
+            modal.classList.add("hidden");
+        });
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+    });
+</script>
+
+
 <script>
     const scrollToTopBtn = document.getElementById("scrollToTopBtn");
     window.addEventListener("scroll", () => {
