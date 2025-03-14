@@ -48,6 +48,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         .category-list-header {
             position: sticky;
@@ -76,6 +77,78 @@
 
         .category-btn {
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Add this to your existing CSS */
+        #productModal .modal-content {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: white;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        #productModal .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+        }
+
+        #productModal .modal-content h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        #productModal .modal-content p {
+            margin-top: 0.5rem;
+            color: #4a4a4a;
+        }
+
+        #productModal .modal-content .price {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        #productModal .modal-content .contact-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        #productModal .modal-content .contact-info .social-icons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #productModal .modal-content .contact-info .social-icons a {
+            color: #1d4ed8;
+            font-size: 1.25rem;
+        }
+
+        #productModal .modal-content .contact-info .phone {
+            color: #ef4444;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        #productModal .modal-content .close-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        #productModal .modal-content .close-btn:hover {
+            color: #374151;
         }
     </style>
 </head>
@@ -136,6 +209,9 @@
                          onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
                     <p class="text-gray-500 text-xs font-bold mb-1 px-4">ID: <?php echo htmlspecialchars($product['product_code']); ?></p>
                     <p class="text-sm font-bold mb-6 px-4"><?php echo htmlspecialchars($product['product_name']); ?></p>
+                    <!-- < ?php if (!empty($product['khr_price']) && $product['khr_price'] > 0): ?>
+                        < ?php echo htmlspecialchars($product['khr_price']); ?>
+                    < ?php endif; ?> -->
                 </a>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -157,6 +233,16 @@
         <p id="modalDescription" class="text-gray-700 mt-2"></p>
         <p id="modalPriceUsd" class="text-lg font-bold mt-2 text-blue-500"></p>
         <p id="modalPriceKhr" class="text-lg font-bold mt-2 text-green-500"></p>
+        <div class="flex justify-between items-center mt-4">
+            <div class="flex space-x-2">
+                <a href="#" class="text-blue-500"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="text-blue-500"><i class="fab fa-telegram"></i></a>
+                <a href="#" class="text-blue-500"><i class="fas fa-map-marker-alt"></i></a>
+            </div>
+            <div class="text-red-500">
+                <i class="fas fa-phone-alt"></i> 012 892 809
+            </div>
+        </div>
     </div>
 </div>
 
