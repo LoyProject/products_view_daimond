@@ -311,7 +311,17 @@
                 currentImageIndex = 0;
                 modalImage.src = imagePaths[currentImageIndex];
 
-                modal.classList.remove("hidden");
+                // Ensure the image is loaded before showing the modal
+                modalImage.onload = function() {
+                    modal.classList.remove("hidden");
+                };
+
+                // Fallback in case the image fails to load
+                modalImage.onerror = function() {
+                    
+                    modalImage.src = imagePaths[currentImageIndex];
+                    modal.classList.remove("hidden");
+                };
             });
         });
 
