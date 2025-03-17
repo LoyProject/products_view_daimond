@@ -23,6 +23,15 @@
         $stmt->execute();
         $result = $stmt->get_result();
         $products = $result->fetch_all(MYSQLI_ASSOC);
+
+        // Fetch product images from product_gallery
+        $product_images = [];
+        $stmt = $conn->prepare("SELECT product_id, GROUP_CONCAT(image_path) as images FROM product_gallery GROUP BY product_id");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $product_images[$row['product_id']] = $row['images'];
+        }
     } catch (Exception $e) {
         die("Database Error: " . $e->getMessage());
     }
@@ -198,7 +207,7 @@
                 <a href="#" class="bg-white shadow rounded-lg product-card category-<?php echo $product['category_id']; ?>" 
                    data-name="<?php echo htmlspecialchars($product['product_name']); ?>" 
                    data-id="<?php echo htmlspecialchars($product['product_code']); ?>" 
-                   data-image="<?php echo htmlspecialchars($product['image']); ?>"
+                   data-image="<?php echo htmlspecialchars($product_images[$product['id']] ?? $product['image']); ?>"
                    data-description="<?php echo htmlspecialchars($product['description'] ?? 'No description available.'); ?>"
                    data-usd-price="<?php echo htmlspecialchars($product['usd_price'] ?? 'N/A'); ?>"
                    data-khr-price="<?php echo htmlspecialchars($product['khr_price'] ?? 'N/A'); ?>">
@@ -227,7 +236,11 @@
 <div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-lg relative">
         <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
-        <img id="modalImage" src="" class="w-full h-48 object-cover rounded">
+        <div id="productGallery" class="relative w-full h-48 overflow-hidden rounded">
+            <img id="modalImage" src="" class="w-full h-full object-cover">
+            <button id="prevImage" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded">‹</button>
+            <button id="nextImage" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded">›</button>
+        </div>
         <h2 id="modalTitle" class="text-xl font-bold mt-4"></h2>
         <p id="modalProductID" class="text-gray-600 text-sm mt-1"></p>
         <p id="modalDescription" class="text-gray-700 mt-2"></p>
@@ -235,12 +248,12 @@
         <p id="modalPriceKhr" class="text-lg font-bold mt-2 text-green-500"></p>
         <div class="flex justify-between items-center mt-4">
             <div class="flex space-x-2">
-                <a href="#" class="text-blue-500"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="text-blue-500"><i class="fab fa-telegram"></i></a>
-                <a href="#" class="text-blue-500"><i class="fas fa-map-marker-alt"></i></a>
+                <a id="modalFacebook" href="#" class="text-blue-500"><i class="fab fa-facebook"></i></a>
+                <a id="modalTelegram" href="#" class="text-blue-500"><i class="fab fa-telegram"></i></a>
+                <a id="modalMap" href="#" class="text-blue-500"><i class="fas fa-map-marker-alt"></i></a>
             </div>
-            <div class="text-red-500">
-                <i class="fas fa-phone-alt"></i> 012 892 809
+            <div id="modalPhone" class="text-red-500">
+                <i class="fas fa-phone-alt"></i> 
             </div>
         </div>
     </div>
@@ -257,6 +270,20 @@
         const modalDescription = document.getElementById("modalDescription");
         const modalPriceUsd = document.getElementById("modalPriceUsd");
         const modalPriceKhr = document.getElementById("modalPriceKhr");
+        const modalFacebook = document.getElementById("modalFacebook");
+        const modalTelegram = document.getElementById("modalTelegram");
+        const modalMap = document.getElementById("modalMap");
+        const modalPhone = document.getElementById("modalPhone");
+        const prevImage = document.getElementById("prevImage");
+        const nextImage = document.getElementById("nextImage");
+
+        const storePhone = "<?php echo htmlspecialchars($store['phone']); ?>";
+        const storeFacebook = "<?php echo htmlspecialchars($store['facebook']); ?>";
+        const storeTelegram = "<?php echo htmlspecialchars($store['telegram']); ?>";
+        const storeMap = "<?php echo htmlspecialchars($store['map']); ?>";
+
+        let currentImageIndex = 0;
+        let imagePaths = [];
 
         document.querySelectorAll(".product-card").forEach(card => {
             card.addEventListener("click", function (event) {
@@ -271,10 +298,18 @@
 
                 modalTitle.textContent = name;
                 modalProductID.textContent = "Product ID: " + productId;
-                modalImage.src = image;
                 modalDescription.textContent = description || "No description available.";
                 modalPriceUsd.textContent = "USD Price: $" + (usdPrice || "N/A");
                 modalPriceKhr.textContent = "KHR Price: ៛" + (khrPrice || "N/A");
+
+                modalFacebook.href = storeFacebook;
+                modalTelegram.href = storeTelegram;
+                modalMap.href = storeMap;
+                modalPhone.innerHTML = `<i class="fas fa-phone-alt"></i> ${storePhone}`;
+
+                imagePaths = image.split(','); // Assuming images are comma-separated
+                currentImageIndex = 0;
+                modalImage.src = imagePaths[currentImageIndex];
 
                 modal.classList.remove("hidden");
             });
@@ -289,16 +324,33 @@
                 modal.classList.add("hidden");
             }
         });
+
+        prevImage.addEventListener("click", function () {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                modalImage.src = imagePaths[currentImageIndex];
+            }
+        });
+
+        nextImage.addEventListener("click", function () {
+            if (currentImageIndex < imagePaths.length - 1) {
+                currentImageIndex++;
+                modalImage.src = imagePaths[currentImageIndex];
+            }
+        });
+
+        document.querySelectorAll("img").forEach(img => {
+            img.onerror = function () {
+                this.src = 'uploads/default-placeholder.png';
+                this.onerror = null;
+            };
+        });
     });
 </script>
-
 
     <footer class="p-4 bg-gray-200 mt-6">
         <p class="text-center text-gray-600">© 2025 Loy Team. All rights reserved.</p>
     </footer>
-
-
-
 
 </body>
 
