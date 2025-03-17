@@ -234,9 +234,9 @@
 
 <!-- ✅ MODAL HTML -->
 <div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-lg relative">
+    <div class="bg-white rounded-lg p-6 max-w-3xl w-full shadow-lg relative"> <!-- Increased max-width to 3xl -->
         <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
-        <div id="productGallery" class="relative w-full h-48 overflow-hidden rounded">
+        <div id="productGallery" class="relative w-full h-96 overflow-hidden rounded"> <!-- Increased height to 96 -->
             <img id="modalImage" src="" class="w-full h-full object-cover">
             <button id="prevImage" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded">‹</button>
             <button id="nextImage" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded">›</button>
@@ -318,7 +318,7 @@
 
                 // Fallback in case the image fails to load
                 modalImage.onerror = function() {
-                    
+
                     modalImage.src = imagePaths[currentImageIndex];
                     modal.classList.remove("hidden");
                 };
