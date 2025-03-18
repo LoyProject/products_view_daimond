@@ -173,7 +173,7 @@
             <h1 class="text-xl font-bold ml-4"><?php echo htmlspecialchars($store['store_name']); ?></h1>
         </div>
         <div class="container px-4 pt-4 pb-2">
-            <div class="overflow-x-scroll whitespace-nowrap" id="categoryList">
+            <div class="overflow-x-scroll whitespace-nowrap" id="categoryList" style="font-family: Khmer OS Battambang;">
                 <?php foreach ($categories as $index => $category): ?>
                     <a class="category-btn mb-3 inline-block py-1 px-4 border-2 border-red-500 rounded-full mr-2 <?php echo $index === 0 ? 'bg-red-100 text-red-500' : 'bg-white text-black'; ?> cursor-pointer hover:bg-red-100 hover:text-red-500 font-medium" aria-label="View <?php echo htmlspecialchars($category['name']); ?> category" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
                         <?php echo htmlspecialchars($category['name']); ?>
@@ -191,7 +191,7 @@
     <?php foreach ($categories as $category): ?>
         <div class="category-section" data-category="<?php echo htmlspecialchars($category['name']); ?>" data-category-id="<?php echo $category['id']; ?>">
             <div class="container px-4 py-2 bg-gray-100">
-                <div class="flex items-center justify-center">
+                <div class="flex items-center justify-center" style="font-family: Khmer OS Battambang;">
                     <div class="flex-grow border-t-4 border-gray-300 ml-6 sm:ml-12"></div>
                     <span class="px-3 text-black font-bold text-lg"><?php echo htmlspecialchars($category['name']); ?></span>
                     <div class="flex-grow border-t-4 border-gray-300 mr-6 sm:mr-12"></div>
@@ -217,7 +217,7 @@
                          loading="lazy" 
                          onerror="this.onerror=null; this.src='uploads/default-placeholder.png';">
                     <p class="text-gray-500 text-xs font-bold mb-1 px-4">ID: <?php echo htmlspecialchars($product['product_code']); ?></p>
-                    <p class="text-sm font-bold mb-6 px-4"><?php echo htmlspecialchars($product['product_name']); ?></p>
+                    <p class="text-sm font-bold mb-6 px-4" style="font-family: Khmer OS Battambang;"><?php echo htmlspecialchars($product['product_name']); ?></p>
                     <!-- < ?php if (!empty($product['khr_price']) && $product['khr_price'] > 0): ?>
                         < ?php echo htmlspecialchars($product['khr_price']); ?>
                     < ?php endif; ?> -->
@@ -235,22 +235,25 @@
 <!-- ✅ MODAL HTML -->
 <div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-3xl w-full shadow-lg relative"> <!-- Increased max-width to 3xl -->
-        <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
-        <div id="productGallery" class="relative w-full h-96 overflow-hidden rounded"> <!-- Increased height to 96 -->
+    <div id="productGallery" class="relative w-full h-96 overflow-hidden rounded"> <!-- Increased height to 96 -->
             <img id="modalImage" src="" class="w-full h-full object-cover">
             <button id="prevImage" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded">‹</button>
             <button id="nextImage" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded">›</button>
         </div>
-        <h2 id="modalTitle" class="text-xl font-bold mt-4"></h2>
-        <p id="modalProductID" class="text-gray-600 text-sm mt-1"></p>
-        <p id="modalDescription" class="text-gray-700 mt-2"></p>
-        <p id="modalPriceUsd" class="text-lg font-bold mt-2 text-blue-500"></p>
-        <p id="modalPriceKhr" class="text-lg font-bold mt-2 text-green-500"></p>
-        <div class="flex justify-between items-center mt-4">
+        <button id="closeModal" style="border: solid 1px red;" class="absolute top-3 right-3 bg-red-700 bg-opacity-50 rounded-lg w-8 h-8 flex items-center justify-center">
+            <span class="text-white text-2xl font-bold" >&times;</span>
+        </button>
+        <p id="modalPriceUsd" class="text-lg font-bold mt-2 text-red-500"></p>
+        <p id="modalPriceKhr" class="text-lg font-bold mt-2 text-red-500" style="display: none;"></p>
+        <p id="modalProductID" class="text-gray-600 text-sm mt-1" style="color: red;"></p>
+        <p id="modalTitle" class="text-gray-600 text-sm mt-1" style="font-family: Khmer OS Battambang; font-weight: bold; font-size: 15px;"></p>       
+        <p id="modalDescription" class="text-gray-700 mt-2" style="font-family: Khmer OS Battambang;"></p>
+       
+        <div class="flex justify-center items-center mt-4 space-x-6 text-2xl">
             <div class="flex space-x-2">
-                <a id="modalFacebook" href="#" class="text-blue-500"><i class="fab fa-facebook"></i></a>
-                <a id="modalTelegram" href="#" class="text-blue-500"><i class="fab fa-telegram"></i></a>
-                <a id="modalMap" href="#" class="text-blue-500"><i class="fas fa-map-marker-alt"></i></a>
+                <a id="modalFacebook" href="#" class="text-blue-500 text-3xl"><i class="fab fa-facebook"></i></a>&nbsp;&nbsp;
+                <a id="modalTelegram" href="#" class="text-blue-500 text-3xl"><i class="fab fa-telegram"></i></a>&nbsp;&nbsp;
+                <a id="modalMap" href="#" class="text-blue-500 text-3xl"><i class="fas fa-map-marker-alt"></i></a>
             </div>
             <div id="modalPhone" class="text-red-500">
                 <i class="fas fa-phone-alt"></i> 
@@ -296,11 +299,11 @@
                 const usdPrice = this.getAttribute("data-usd-price");
                 const khrPrice = this.getAttribute("data-khr-price");
 
-                modalTitle.textContent = name;
-                modalProductID.textContent = "Product ID: " + productId;
+                modalProductID.textContent = "ID: " + productId;
+                modalTitle.textContent = name;               
                 modalDescription.textContent = description || "No description available.";
-                modalPriceUsd.textContent = "USD Price: $" + (usdPrice || "N/A");
-                modalPriceKhr.textContent = "KHR Price: ៛" + (khrPrice || "N/A");
+                modalPriceUsd.textContent = "$" + (usdPrice || "N/A");
+                modalPriceKhr.textContent = "៛" + (khrPrice || "N/A");
 
                 modalFacebook.href = storeFacebook;
                 modalTelegram.href = storeTelegram;
@@ -318,7 +321,6 @@
 
                 // Fallback in case the image fails to load
                 modalImage.onerror = function() {
-
                     modalImage.src = imagePaths[currentImageIndex];
                     modal.classList.remove("hidden");
                 };
