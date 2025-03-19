@@ -152,7 +152,7 @@ include 'header.php';
                         </div>
                         <div class="mb-6">
                             <label for="gallery" class="block text-gray-700 font-medium mb-2">Image Gallery</label>
-                            <input type="file" id="gallery" name="  []" multiple
+                            <input type="file" id="gallery" name="gallery[]" multiple
                                 class="w-full border border-gray-300 shadow-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                         <div class="flex justify-end space-x-4">
