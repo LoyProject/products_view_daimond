@@ -29,29 +29,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!empty($productName) && $usdPrice > 0 && $khrPrice > 0 && !empty($productCode) && !empty($description) && $categoryId > 0) {
-        $sql = "INSERT INTO store_products (product_name, usd_price, khr_price, product_code, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sddssis", $productName, $usdPrice, $khrPrice, $productCode, $description, $categoryId, $image);
+        $stmt = $conn->prepare("INSERT INTO store_products (product_name, usd_price, khr_price, product_code, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssss", $productName, $usdPrice, $khrPrice, $productCode, $description, $categoryId, $image);
 
         if ($stmt->execute()) {
             $productId = $stmt->insert_id;
 
             if (!empty($gallery)) {
-                $stmt->close();
-
-                $stmt = $conn->prepare("INSERT INTO product_gallery (product_id, image_path) VALUES (?, ?)");
+                $galleryStmt = $conn->prepare("INSERT INTO product_gallery (product_id, image_path) VALUES (?, ?)");
                 foreach ($gallery as $galleryImage) {
-                    $stmt->bind_param("is", $productId, $galleryImage);
-                    $stmt->execute();
+                    $galleryStmt->bind_param("is", $productId, $galleryImage);
+                    $galleryStmt->execute();
                 }
-                $stmt->close();
+                $galleryStmt->close();
             }
 
             $response['status'] = 'success';
             $response['message'] = 'Product inserted successfully.';
         } else {
-            $response['message'] = 'Failed to insert product.';
+            $response['message'] = 'Failed to insert product: ' . $stmt->error;
         }
 
         $stmt->close();

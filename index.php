@@ -479,17 +479,49 @@
             lastClickedCategory = selectedCategory;
             highlightButton(selectedCategory);
 
+            // Update the URL hash
+            history.pushState(null, null, `#${selectedCategory}`);
+
             const categoryHeader = document.querySelector(`.category-section[data-category="${selectedCategory}"]`);
             if (categoryHeader) {
                 const headerHeight = document.querySelector(".category-list-header").offsetHeight;
-                const yOffset = categoryHeader.getBoundingClientRect().top + window.scrollY - headerHeight + 5;
+                const yOffset = categoryHeader.getBoundingClientRect().top + window.scrollY - headerHeight + 1; // Adding 1 to ensure it scrolls past the header
                 window.scrollTo({ 
-                    top: Math.max(yOffset, 0), 
+                    top: yOffset, 
                     behavior: "smooth" 
                 });
                 setTimeout(() => { isScrolling = false; }, 500);
             }
         }
+
+        // Scroll to the category section based on the URL hash
+        function scrollToCategoryFromHash() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const categoryButton = document.querySelector(`.category-btn[data-category="${hash}"]`);
+                if (categoryButton) {
+                    categoryButton.click();
+                } else {
+                    // If the category button is not found, scroll to the category section directly
+                    const categoryHeader = document.querySelector(`.category-section[data-category="${hash}"]`);
+                    if (categoryHeader) {
+                        const headerHeight = document.querySelector(".category-list-header").offsetHeight;
+                        const yOffset = categoryHeader.getBoundingClientRect().top + window.scrollY - headerHeight + 1; // Adding 1 to ensure it scrolls past the header
+                        window.scrollTo({ 
+                            top: yOffset, 
+                            behavior: "smooth" 
+                        });
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('popstate', scrollToCategoryFromHash);
+
+        // Call the function on page load to handle direct links with hash
+        document.addEventListener("DOMContentLoaded", function () {
+            scrollToCategoryFromHash();
+        });
 
         let searchTimeout;
         searchInput.addEventListener("input", function () {
