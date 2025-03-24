@@ -29,10 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!empty($productName) && $usdPrice > 0 && $khrPrice > 0 && !empty($productCode) && !empty($description) && $categoryId > 0) {
-        $sql = "INSERT INTO store_products (product_name, usd_price, khr_price, product_code, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
+        $sql = "INSERT INTO store_products (product_name, usd_price, khr_price, product_code, description, image, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sddssis", $productName, $usdPrice, $khrPrice, $productCode, $description, $categoryId, $image);
+        if ($stmt === false) {
+            $response['message'] = 'Prepare failed: ' . $conn->error;
+            echo json_encode($response);
+            exit;
+        }
+
+        $stmt->bind_param("sddsssi", $productName, $usdPrice, $khrPrice, $productCode, $description, $image, $categoryId);
 
         if ($stmt->execute()) {
             $productId = $stmt->insert_id;
@@ -41,9 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->close();
 
                 $stmt = $conn->prepare("INSERT INTO product_gallery (product_id, image_path) VALUES (?, ?)");
+                if ($stmt === false) {
+                    $response['message'] = 'Prepare failed: ' . $conn->error;
+                    echo json_encode($response);
+                    exit;
+                }
+
                 foreach ($gallery as $galleryImage) {
                     $stmt->bind_param("is", $productId, $galleryImage);
-                    $stmt->execute();
+                    if (!$stmt->execute()) {
+                        $response['message'] = 'Failed to insert gallery image: ' . $stmt->error;
+                        echo json_encode($response);
+                        exit;
+                    }
                 }
                 $stmt->close();
             }
@@ -51,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['status'] = 'success';
             $response['message'] = 'Product inserted successfully.';
         } else {
-            $response['message'] = 'Failed to insert product.';
+            $response['message'] = 'Failed to insert product: ' . $stmt->error;
         }
 
         $stmt->close();
