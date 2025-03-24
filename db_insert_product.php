@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         exit;
                     }
                 }
-                $stmt->close();
+                $galleryStmt->close();
             }
 
             $response['status'] = 'success';
